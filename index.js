@@ -1,6 +1,5 @@
 /*
 	Server
-	Program entry point
 */
 
 const express = require('express');
