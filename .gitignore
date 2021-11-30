@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Generated at build time by browserify
+static/dist/
