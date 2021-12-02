@@ -4,8 +4,8 @@
   "description": "A collaborative software for live music (jam) sessions",
   "main": "server.js",
   "scripts": {
-    "build": "browserify client.js -o static/dist/bundle.js", 
-    "test": "echo \"Error: no test specified\" && exit 1", 
+    "build": "browserify client.js -o static/dist/bundle.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "repository": {
@@ -22,6 +22,7 @@
     "@teamwork/websocket-json-stream": "^2.0.0",
     "browserify": "^17.0.0",
     "express": "^4.17.1",
+    "konva": "^8.3.0",
     "reconnecting-websocket": "^4.4.0",
     "sharedb": "^2.2.0",
     "tone": "^14.7.77",
