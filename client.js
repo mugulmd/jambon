@@ -15,164 +15,213 @@ const socket = new ReconnectingWebSocket('ws://' + window.location.host);
 const connection = new sharedb.Connection(socket);
 
 
-// Rythm
+// Shared data
 
-let rythm = {
-	bpm: 90, 
-	loop_size: 4, 
-	time_signature: 4
+let shared = {
+	instruments: {
+		samples: connection.get('instruments', 'samples'), 
+		panvols: connection.get('instruments', 'panvols')
+	}, 
+	tracks: {
+		rythm: connection.get('tracks', 'rythm'), 
+		patterns: connection.get('tracks', 'patterns')
+	} 
 };
 
+function nSlots() {
+	return shared.tracks.rythm.data.loop_size * shared.tracks.rythm.data.time_signature;
+}
 
-// Intruments (players only here)
 
-let samples = {
-	'kick': "samples/kick_00.wav", 
-	'snare': "samples/snare_00.wav", 
-	'hihat': "samples/closed_hat_00.wav"
+// Local data
+
+let local = {
+	instruments: {
+		players: {}
+	}, 
+	tracks: {
+		pattern_event_ids: {}
+	}
 };
 
-let shared_panvols = connection.get('instruments', 'panvols');
-
-let players = {};
-for (let key in samples) {
+function addPlayerLocal(key) {
 	let panvol = new Tone.PanVol(0, 0).toDestination();
-	let player = new Tone.Player(samples[key]).connect(panvol);
-	players[key] = {
+	let url = shared.instruments.samples.data[key];
+	let player = new Tone.Player(url).connect(panvol);
+	local.instruments.players[key] = {
 		audio: player, 
 		ctrl: panvol
 	};
 }
 
-let updateLocalPanvol = function(key) {
-	players[key].ctrl.pan.value = shared_panvols.data[key].pan;
-	players[key].ctrl.volume.value = shared_panvols.data[key].volume;
+function addPatternLocal(key) {
+	local.tracks.pattern_event_ids[key] = [];
+	for (let i = 0; i < nSlots(); i++) {
+		local.tracks.pattern_event_ids[key].push(0);
+	}
+}
+
+
+// UI
+
+let ui = {
+	orchestra: {
+		stage: undefined, 
+		layers: {}, 
+		elts: {}
+	}, 
+	sequencer: {
+		stage: undefined, 
+		layers: {}, 
+		cells: {}, 
+		nRows: 0
+	}, 
+	piano: undefined, 
+	participants: undefined, 
+	controls: undefined
 };
 
-shared_panvols.subscribe(() => {
-	if(!shared_panvols.type) {
-		let panvols = {};
-		for (let key in samples) {
-			panvols[key] = {
-				pan: 0, 
-				volume: 0
-			};
-		}
-		shared_panvols.create(panvols);
-	}
-	for (let key in samples) {
-		updateLocalPanvol(key);
-	}
-});
-shared_panvols.on('op', (op, source) => {
-	let key = op[0].p[0];
-	updateLocalPanvol(key);
-});
-
-
-// Orchestra map
-
-let stage = new Konva.Stage({
+ui.orchestra.stage = new Konva.Stage({
 	container: "orchestra-map", 
-	width: 900, 
-	height: 600
+	width: 640, 
+	height: 480
 });
 
-let layer = new Konva.Layer();
+ui.orchestra.layers['main'] = new Konva.Layer();
+ui.orchestra.stage.add(ui.orchestra.layers['main']);
+ui.orchestra.layers['main'].draw();
 
-let counter = 0;
-for (let key in samples) {
+function addOrchestraElt(key, pos) {
 	let circle = new Konva.Circle({
-		x: stage.width() / 2, 
-		y: stage.height() - 100 * (counter + 1), 
-		radius: 30, 
+		x: pos.x, 
+		y: pos.y, 
+		radius: 10, 
 		fill: 'red', 
 		draggable: true
 	});
 	circle.on('dragend', () => {
-		let old = shared_panvols.data[key];
+		let old = shared.instruments.panvols.data[key];
 		let panvol = {
-			pan: 2 * (circle.x() / stage.width()) - 1, 
+			pan: 2 * (circle.x() / ui.orchestra.stage.width()) - 1, 
 			volume: old.volume
 		};
-		shared_panvols.submitOp([{p: [key], od: old, oi: panvol}]);
+		shared.instruments.panvols.submitOp([{p: [key], od: old, oi: panvol}]);
 	});
-	layer.add(circle);
-	counter++;
+	ui.orchestra.elts[key] = circle;
+	ui.orchestra.layers['main'].add(circle);
 }
 
-stage.add(layer);
-
-layer.draw();
-
-
-// Sequencer : local event ids + shared patterns + UI
-
-let n = rythm.loop_size * rythm.time_signature;
-
-let play_event_ids = {};
-for (let key in samples) {
-	play_event_ids[key] = [];
-	for (let i = 0; i < n; i++) {
-		play_event_ids[key].push(0);
-	}
-}
-
-let shared_patterns = connection.get('tracks', 'patterns');
-
-for (let key in samples) {
-	let row = document.createElement("div");
-	row.classList.add("row");
-	row.id = key;
-	document.getElementById("step-sequencer").appendChild(row);
-	for (let i = 0; i < n; i++) {
-		let cell = document.createElement("input");
-		cell.type = "checkbox";
-		cell.onclick = function() {
-			let old = shared_patterns.data[key][i];
-			shared_patterns.submitOp([{p: [key, i], ld: old, li: cell.checked}]);
-		};
-		cell.classList.add("cell");
-		row.appendChild(cell);
-	}
-}
-
-let updateLocalPattern = function(key, idx) {
-	let cell = document.getElementById(key).getElementsByClassName("cell")[idx];
-	cell.checked = shared_patterns.data[key][idx];
-	if(cell.checked) {
-		play_event_ids[key][idx] = Tone.Transport.scheduleRepeat(
-			(time) => {
-				players[key].audio.start(time);
-			}, 
-			{"4n": rythm.loop_size}, 
-			{"16n": idx});
-	} else {
-		Tone.Transport.clear(play_event_ids[key][idx]);
-	}
-};
-
-shared_patterns.subscribe(() => {
-	if (!shared_patterns.type) {
-		let patterns = {};
-		for (let key in samples) {
-			patterns[key] = [];
-			for (let i = 0; i < n; i++) {
-				patterns[key].push(false);
-			}
-		}
-		shared_patterns.create(patterns);
-	}
-	for (let key in samples) {
-		for (let i = 0; i < n; i++) {
-			updateLocalPattern(key, i);
-		}
-	}
+ui.sequencer.stage = new Konva.Stage({
+	container: "step-sequencer", 
+	width: 800, 
+	height: 400
 });
-shared_patterns.on('op', (op, source) => {
+
+ui.sequencer.layers['main'] = new Konva.Layer();
+ui.sequencer.stage.add(ui.sequencer.layers['main']);
+ui.sequencer.layers['main'].draw();
+
+function addSequencerRow(key) {
+	ui.sequencer.cells[key] = [];
+	let yRow = 10 + ui.sequencer.nRows*10;
+	for (let i = 0; i < nSlots(); i++) {
+		let cell = new Konva.Rect({
+			x: 10 + i*15, 
+			y: yRow, 
+			width: 15, 
+			height: 10, 
+			fill: 'blue', 
+			cornerRadius: 3
+		});
+		cell.on('click', () => {
+			let old = shared.tracks.patterns.data[key][i];
+			shared.tracks.patterns.submitOp([{p: [key, i], ld: old, li: !old}]);
+		});
+		ui.sequencer.cells[key].push(cell);
+		ui.sequencer.layers['main'].add(cell);
+	}
+	ui.sequencer.nRows++;
+}
+
+
+// Flush data from shared to local
+
+function flushPanvol(key) {
+	local.instruments.players[key].ctrl.pan.value = shared.instruments.panvols.data[key].pan;
+	local.instruments.players[key].ctrl.volume.value = shared.instruments.panvols.data[key].volume;
+	ui.orchestra.elts[key].x(ui.orchestra.stage.width() * (shared.instruments.panvols.data[key].pan + 1) / 2);
+}
+
+function flushPatternStep(key, idx) {
+	let checked = shared.tracks.patterns.data[key][idx];
+	let cell = ui.sequencer.cells[key][idx];
+	if(checked) {
+		local.tracks.pattern_event_ids[key][idx] = Tone.Transport.scheduleRepeat(
+			(time) => {
+				local.instruments.players[key].audio.start(time);
+			}, 
+			{"4n": shared.tracks.rythm.data.loop_size}, 
+			{"16n": idx});
+		cell.fill('green');
+	} else {
+		Tone.Transport.clear(local.tracks.pattern_event_ids[key][idx]);
+		cell.fill('blue');
+	}
+}
+
+function flushPattern(key) {
+	for (let i = 0; i < nSlots(); i++) {
+		flushPatternStep(key, i);
+	}
+}
+
+
+// Initialization
+
+shared.tracks.rythm.subscribe(() => {
+	console.log("subscription to rythm data : ok");
+
+	shared.instruments.samples.subscribe(() => {
+		console.log("subscription to samples data : ok");
+
+		let counter = 0;
+		for (let key in shared.instruments.samples.data) {
+			addPlayerLocal(key);
+			addPatternLocal(key);
+			addOrchestraElt(key, {x: ui.orchestra.stage.width()/2, y: ui.orchestra.stage.height()-50*(counter+1)});
+			addSequencerRow(key);
+			counter++;
+		}
+		console.log("local data initialized");
+
+		shared.instruments.panvols.subscribe(() => {
+			for (let key in shared.instruments.samples.data) {
+				flushPanvol(key);
+			}
+			console.log("shared panvols flushed");
+		});
+
+		shared.tracks.patterns.subscribe(() => {
+			for (let key in shared.instruments.samples.data) {
+				flushPattern(key);
+			}
+			console.log("shared patterns flushed");
+		});
+	});
+});
+
+
+// Callbacks
+
+shared.instruments.panvols.on('op', (op, source) => {
+	let key = op[0].p[0];
+	flushPanvol(key);
+});
+
+shared.tracks.patterns.on('op', (op, source) => {
 	let key = op[0].p[0];
 	let idx = op[0].p[1];
-	updateLocalPattern(key, idx);
+	flushPatternStep(key, idx);
 });
 
 
@@ -180,7 +229,7 @@ shared_patterns.on('op', (op, source) => {
 
 document.getElementById("buttonPlay").onclick = function() {
 	console.log("play");
-	Tone.Transport.bpm.value = rythm.bpm;
+	Tone.Transport.bpm.value = shared.tracks.rythm.data.bpm;
 	Tone.Transport.toggle();
 };
 
