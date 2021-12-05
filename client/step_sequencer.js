@@ -8,7 +8,7 @@ class StepSequencer {
 
 		this.stage = new Konva.Stage({
 			container: "step-sequencer", 
-			width: 800, 
+			width: 900, 
 			height: 400
 		});
 

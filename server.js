@@ -9,6 +9,7 @@ const express = require("express");
 const WebSocket = require("ws");
 const Backend = require("sharedb");
 const WebSocketJSONStream = require("@teamwork/websocket-json-stream");
+const Notes = require('./utils/notes.js');
 
 
 // App
@@ -41,17 +42,22 @@ let samples_data = {
 };
 samples.create(samples_data);
 
+let synths = connection.get('instruments', 'synths');
+let synths_data = {
+	'synth': "default"
+};
+synths.create(synths_data);
+
 let geom = connection.get('instruments', 'geom');
 let geom_data = {};
-let counter = 0;
-for (let key in samples_data) {
+let keys = Object.keys(samples_data).concat(Object.keys(synths_data));
+keys.forEach((key, idx) => {
 	geom_data[key] = {
 		x: 0, 
-		y: 1 - 2 * ((counter+1) / (Object.keys(samples_data).length+2)), 
+		y: 1 - 2 * ((idx+1) / (keys.length+2)), 
 		size: 1
 	};
-	counter++;
-}
+});
 geom.create(geom_data);
 
 let rythm = connection.get('tracks', 'rythm');
@@ -73,6 +79,20 @@ for (let key in samples_data) {
 	}
 }
 patterns.create(patterns_data);
+
+let scores = connection.get('tracks', 'scores');
+let scores_data = {};
+for (let key in synths_data) {
+	scores_data[key] = {};
+	for (let i = 0; i < 12; i++) {
+		let freq = Notes.freq(i);
+		scores_data[key][freq] = [];
+		for (let j = 0; j < n_slots; j++) {
+			scores_data[key][freq].push(false);
+		}
+	}
+}
+scores.create(scores_data);
 
 
 // Launch

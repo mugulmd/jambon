@@ -3,6 +3,7 @@
 const OrchestraMap = require('./orchestra_map.js');
 const StepSequencer = require('./step_sequencer.js');
 const CtrlPannel = require('./ctrl_pannel.js');
+const PianoRoll = require('./piano_roll.js');
 
 class SessionUI {
 	constructor(session_controller) {
@@ -10,6 +11,7 @@ class SessionUI {
 		this.orchestra_map = new OrchestraMap(session_controller);
 		this.step_sequencer = new StepSequencer(session_controller);
 		this.ctrl_pannel = new CtrlPannel(session_controller);
+		this.piano_roll = new PianoRoll(session_controller);
 	}
 }
 
