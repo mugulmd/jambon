@@ -1,4 +1,5 @@
 // server.js
+// server side entry point
 
 
 // Imports
@@ -40,15 +41,18 @@ let samples_data = {
 };
 samples.create(samples_data);
 
-let panvols = connection.get('instruments', 'panvols');
-let panvols_data = {};
+let geom = connection.get('instruments', 'geom');
+let geom_data = {};
+let counter = 0;
 for (let key in samples_data) {
-	panvols_data[key] = {
-		pan: 0, 
-		volume: 0
+	geom_data[key] = {
+		x: 0, 
+		y: 1 - 2 * ((counter+1) / (Object.keys(samples_data).length+2)), 
+		size: 1
 	};
+	counter++;
 }
-panvols.create(panvols_data);
+geom.create(geom_data);
 
 let rythm = connection.get('tracks', 'rythm');
 let rythm_data = {

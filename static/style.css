@@ -1,23 +1,19 @@
 body {
-	/* TODO */
+	font-family: Ubuntu;
 }
 
 #player-controls {
-	/* TODO */
-}
-
-#participants {
-	/* TODO */
+	border: 2px solid black;
 }
 
 #orchestra-map {
-	/* TODO */
+	border: 2px solid black;
 }
 
 #step-sequencer {
-	/* TODO */
+	border: 2px solid black;
 }
 
 #piano-roll {
-	/* TODO */
+	border: 2px solid black;
 }
