@@ -17,32 +17,65 @@ class OrchestraMap {
 		this.layer_elts.draw();
 
 		this.elts = {};
+		this.elt_size = 20;
+		this.default_color = 'red';
+		this.mute_color = 'gray';
 	}
 
 	add(key) {
-		let circle = new Konva.Circle({
+		let group = new Konva.Group({
 			x: this.stage.width()/2, 
 			y: this.stage.height()/2, 
-			radius: 10, 
-			fill: 'red', 
 			draggable: true
 		});
-		circle.on('dragend', () => {
+		let circle = new Konva.Circle({
+			x: 0, 
+			y: 0, 
+			radius: this.elt_size, 
+			fill: this.default_color
+		});
+		group.add(circle);
+		let text = new Konva.Text({
+			x: -this.elt_size/2, 
+			y: -this.elt_size/2, 
+			text: key, 
+			fontSize: 12, 
+			fontFamily: 'Ubuntu'
+		});
+		group.add(text);
+		group.on('dragend', () => {
 			let old = this.session.shared.geom.data[key];
 			let geom = { 
-				x: 2 * (circle.x() / this.stage.width()) - 1, 
-				y: 2 * (circle.y() / this.stage.height()) - 1, 
-				size: old.size
+				x: 2 * (group.x() / this.stage.width()) - 1, 
+				y: 2 * (group.y() / this.stage.height()) - 1, 
+				size: old.size, 
+				active: old.active
 			};
 			this.session.shared.geom.submitOp([{p: [key], od: old, oi: geom}]);
 		});
-		this.elts[key] = circle;
-		this.layer_elts.add(circle);
+		group.on('dblclick', () => {
+			let old = this.session.shared.geom.data[key];
+			let geom = { 
+				x: old.x, 
+				y: old.y, 
+				size: old.size, 
+				active: !old.active
+			};
+			this.session.shared.geom.submitOp([{p: [key], od: old, oi: geom}]);
+		});
+		this.elts[key] = group;
+		this.layer_elts.add(group);
 	}
 
 	update(key, geom) {
 		this.elts[key].x(this.stage.width() * (geom.x + 1) / 2);
 		this.elts[key].y(this.stage.height() * (geom.y + 1) / 2);
+		let circle = this.elts[key].getChildren((node) => {return node.getClassName()=='Circle';})[0];
+		if (geom.active) {
+			circle.fill(this.default_color);
+		} else {
+			circle.fill(this.mute_color);
+		}
 	} 
 }
 

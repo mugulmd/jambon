@@ -2,11 +2,11 @@
   "name": "jambon",
   "version": "1.0.0",
   "description": "A collaborative software for live music (jam) sessions",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "build": "browserify client/index.js -o static/dist/bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",

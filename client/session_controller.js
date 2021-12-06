@@ -18,8 +18,10 @@ class SessionController {
 		this.ui.orchestra_map.update(key, geom);
 		if (key in this.shared.samples.data) {
 			this.local.players[key].ctrl.pan.value = geom.x;
+			this.local.players[key].ctrl.mute = !geom.active;
 		} else {
 			this.local.synths[key].ctrl.pan.value = geom.x;
+			this.local.synths[key].ctrl.mute = !geom.active;
 		}
 	}
 
