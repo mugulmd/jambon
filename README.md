@@ -18,8 +18,8 @@ A collaborative software for live music (jam) sessions
 
 ## TODO
 
-- orchestra map : control volume with size, icon/text for each element, background layer
-- step sequencer : icon/text for each element, background layer, grid layer, add new sample
+- orchestra map : control volume with size, background layer
+- step sequencer : icon/text for each element, background layer, grid layer
 - control pannel : play/pause icons, bpm slider, time signature combo box
-- piano roll : view, interaction, add new synth
+- piano roll : view, interaction
 - group awareness features

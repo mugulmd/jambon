@@ -12,6 +12,10 @@ class OrchestraMap {
 			height: 480
 		});
 
+		this.layer_bckg = new Konva.Layer();
+		this.stage.add(this.layer_bckg);
+		this.layer_bckg.draw();
+
 		this.layer_elts = new Konva.Layer();
 		this.stage.add(this.layer_elts);
 		this.layer_elts.draw();
@@ -20,6 +24,19 @@ class OrchestraMap {
 		this.elt_size = 20;
 		this.default_color = 'red';
 		this.mute_color = 'gray';
+
+		this.drawBckg();
+	}
+
+	drawBckg() {
+		let rect = new Konva.Rect({
+			x: 0, 
+			y: 0, 
+			width: this.stage.width(),
+			height: this.stage.height(), 
+			fill: 'beige'
+		});
+		this.layer_bckg.add(rect);
 	}
 
 	add(key) {

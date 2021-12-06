@@ -27,7 +27,6 @@ class SessionController {
 
 	flushPatternStep(key, idx) {
 		let checked = this.shared.patterns.data[key][idx];
-		let cell = this.ui.step_sequencer.cells[key][idx];
 		if(checked) {
 			this.local.pattern_event_ids[key][idx] = Tone.Transport.scheduleRepeat(
 				(time) => {
@@ -35,11 +34,10 @@ class SessionController {
 				}, 
 				{"4n": this.shared.rythm.data.loop_size}, 
 				{"16n": idx});
-			cell.fill('green');
 		} else {
 			Tone.Transport.clear(this.local.pattern_event_ids[key][idx]);
-			cell.fill('blue');
 		}
+		this.ui.step_sequencer.update(key, idx, checked);
 	}
 
 	flushPattern(key) {
@@ -51,7 +49,6 @@ class SessionController {
 
 	flushScoreNote(key, freq, idx) {
 		let checked = this.shared.scores.data[key][freq][idx];
-		let cell = this.ui.piano_roll.cells[freq][idx];
 		if(checked) {
 			this.local.score_event_ids[key][freq][idx] = Tone.Transport.scheduleRepeat(
 				(time) => {
@@ -59,11 +56,10 @@ class SessionController {
 				}, 
 				{"4n": this.shared.rythm.data.loop_size}, 
 				{"16n": idx});
-			cell.fill('green');
 		} else {
 			Tone.Transport.clear(this.local.score_event_ids[key][freq][idx]);
-			cell.fill('blue');
 		}
+		this.ui.piano_roll.update(freq, idx, checked);
 	}
 
 	flushScore(key) {
