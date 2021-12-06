@@ -8,8 +8,8 @@ class OrchestraMap {
 
 		this.stage = new Konva.Stage({
 			container: "orchestra-map", 
-			width: 640, 
-			height: 480
+			width: 900, 
+			height: 400
 		});
 
 		this.layer_bckg = new Konva.Layer();
@@ -37,6 +37,24 @@ class OrchestraMap {
 			fill: 'beige'
 		});
 		this.layer_bckg.add(rect);
+
+		for (let r = 50; r < this.stage.height(); r += 100) {
+			let circle = new Konva.Circle({
+				x: this.stage.width()/2, 
+				y: this.stage.height(), 
+				radius: r, 
+				stroke: 'darkkhaki', 
+				strokeWidth: 3
+			});
+			this.layer_bckg.add(circle);
+		}
+
+		let line = new Konva.Line({
+			points: [this.stage.width()/2, 0, this.stage.width()/2, this.stage.height()], 
+			stroke: 'darkkhaki', 
+			strokeWidth: 3
+		});
+		this.layer_bckg.add(line);
 	}
 
 	add(key) {
@@ -60,6 +78,9 @@ class OrchestraMap {
 			fontFamily: 'Ubuntu'
 		});
 		group.add(text);
+		this.elts[key] = group;
+		this.layer_elts.add(group);
+
 		group.on('dragend', () => {
 			let old = this.session.shared.geom.data[key];
 			let geom = { 
@@ -70,6 +91,7 @@ class OrchestraMap {
 			};
 			this.session.shared.geom.submitOp([{p: [key], od: old, oi: geom}]);
 		});
+
 		group.on('dblclick', () => {
 			let old = this.session.shared.geom.data[key];
 			let geom = { 
@@ -80,8 +102,26 @@ class OrchestraMap {
 			};
 			this.session.shared.geom.submitOp([{p: [key], od: old, oi: geom}]);
 		});
-		this.elts[key] = group;
-		this.layer_elts.add(group);
+
+		let tr = new Konva.Transformer({
+			nodes: [group], 
+			keepRatio: true, 
+			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'], 
+			rotateEnabled: false, 
+			centeredScaling: true
+		});
+		this.layer_elts.add(tr);
+
+		group.on('transformend', () => {
+			let old = this.session.shared.geom.data[key];
+			let geom = { 
+				x: old.x, 
+				y: old.y, 
+				size: group.scaleX(), 
+				active: old.active
+			};
+			this.session.shared.geom.submitOp([{p: [key], od: old, oi: geom}]);
+		});
 	}
 
 	update(key, geom) {
