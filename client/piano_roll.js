@@ -25,6 +25,10 @@ class PianoRoll {
 		this.stage.add(this.layer_cells);
 		this.layer_cells.draw();
 
+		this.layer_grid = new Konva.Layer();
+		this.stage.add(this.layer_grid);
+		this.layer_grid.draw();
+
 		this.cells = {};
 		this.keyboard_size = 100;
 		this.cell_width = 30;
@@ -51,7 +55,7 @@ class PianoRoll {
 		for (let i = 0; i < 12; i++) {
 			let text = new Konva.Text({
 				x: 10, 
-				y: 10 + i * this.cell_height, 
+				y: (i+1) * this.cell_height, 
 				text: Notes.freq(i), 
 				fontSize: 12, 
 				fontFamily: 'Ubuntu'
@@ -60,14 +64,14 @@ class PianoRoll {
 		}
 	}
 
-	init() {
+	createCells() {
 		for (let i = 0; i < 12; i++) {
 			let freq = Notes.freq(i);
 			this.cells[freq] = [];
 			for (let j = 0; j < this.session.shared.nSlots(); j++) {
 				let cell = new Konva.Rect({
 					x: this.keyboard_size + j * this.cell_width, 
-					y: 10 + i * this.cell_height, 
+					y: (i+1) * this.cell_height, 
 					width: this.cell_width, 
 					height: this.cell_height, 
 					fill: this.default_color, 
@@ -81,6 +85,36 @@ class PianoRoll {
 				this.layer_cells.add(cell);
 			}
 		}
+	}
+
+	drawGrid() {
+		let n_rows = Object.keys(this.cells).length;
+		let n_slots = this.session.shared.nSlots();
+
+		for (let i = 0; i <= n_rows; i++) {
+			let y = (i + 1) * this.cell_height;
+			let line = new Konva.Line({
+				points: [0, y, this.keyboard_size+n_slots*this.cell_width, y], 
+				stroke: 'darkslategray', 
+				strokeWidth: 1
+			});
+			this.layer_grid.add(line);
+		}
+
+		for (let i = 0; i <= n_slots; i++) {
+			let x = this.keyboard_size + i * this.cell_width;
+			let line = new Konva.Line({
+				points: [x, this.cell_height, x, (n_rows+1)*this.cell_height], 
+				stroke: 'darkslategray', 
+				strokeWidth: ((i % 4 == 0) ? 2 : 1)
+			});
+			this.layer_grid.add(line);
+		}
+	}
+
+	init() {
+		this.createCells();
+		this.drawGrid();
 	}
 
 	update(freq, idx, active) {

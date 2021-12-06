@@ -24,6 +24,10 @@ class StepSequencer {
 		this.stage.add(this.layer_cells);
 		this.layer_cells.draw();
 
+		this.layer_grid = new Konva.Layer();
+		this.stage.add(this.layer_grid);
+		this.layer_grid.draw();
+
 		this.cells = {};
 		this.id_col_size = 100;
 		this.cell_width = 30;
@@ -43,6 +47,33 @@ class StepSequencer {
 			fill: 'beige'
 		});
 		this.layer_bckg.add(rect);
+	}
+
+	drawGrid() {
+		this.layer_grid.destroyChildren();
+
+		let n_rows = Object.keys(this.cells).length;
+		let n_slots = this.session.shared.nSlots();
+
+		for (let i = 0; i <= n_rows; i++) {
+			let y = (i + 1) * this.cell_height;
+			let line = new Konva.Line({
+				points: [0, y, this.id_col_size+n_slots*this.cell_width, y], 
+				stroke: 'darkslategray', 
+				strokeWidth: 1
+			});
+			this.layer_grid.add(line);
+		}
+
+		for (let i = 0; i <= n_slots; i++) {
+			let x = this.id_col_size + i * this.cell_width;
+			let line = new Konva.Line({
+				points: [x, this.cell_height, x, (n_rows+1)*this.cell_height], 
+				stroke: 'darkslategray', 
+				strokeWidth: ((i % 4 == 0) ? 2 : 1)
+			});
+			this.layer_grid.add(line);
+		}
 	}
 
 	add(key) {
@@ -76,6 +107,8 @@ class StepSequencer {
 			this.cells[key].push(cell);
 			this.layer_cells.add(cell);
 		}
+
+		this.drawGrid();
 	}
 
 	update(key, idx, active) {
