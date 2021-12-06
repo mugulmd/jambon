@@ -10,6 +10,7 @@ const WebSocket = require("ws");
 const Backend = require("sharedb");
 const WebSocketJSONStream = require("@teamwork/websocket-json-stream");
 const Notes = require('./utils/notes.js');
+const Tone = require('tone');
 
 
 // App
@@ -49,7 +50,9 @@ samples.create(samples_data);
 // synths
 let synths = connection.get('instruments', 'synths');
 let synths_data = {
-	'synth': "default"
+	'synth': {}, 
+	'FM synth': {}, 
+	'AM synth': {}
 };
 synths.create(synths_data);
 

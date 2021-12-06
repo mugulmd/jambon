@@ -7,6 +7,8 @@ class PianoRoll {
 	constructor(session_controller) {
 		this.session = session_controller;
 
+		this.synth_name = undefined;
+
 		this.stage = new Konva.Stage({
 			container: "piano-roll", 
 			width: 900, 
@@ -35,6 +37,7 @@ class PianoRoll {
 		this.cell_height = 20;
 		this.default_color = 'gray';
 		this.active_color = 'orange';
+		this.synth_label = undefined;
 
 		this.drawBckg();
 		this.drawKeyboard();
@@ -49,6 +52,14 @@ class PianoRoll {
 			fill: 'beige'
 		});
 		this.layer_bckg.add(rect);
+
+		this.synth_label = new Konva.Text({
+			x: 10, 
+			y: 10, 
+			fontSize: 12, 
+			fontFamily: 'Ubuntu'
+		});
+		this.layer_bckg.add(this.synth_label);
 	}
 
 	drawKeyboard() {
@@ -78,8 +89,8 @@ class PianoRoll {
 					cornerRadius: 5
 				});
 				cell.on('click', () => {
-					let old = this.session.shared.scores.data['synth'][freq][j];
-					this.session.shared.scores.submitOp([{p: ['synth', freq, j], ld: old, li: !old}]);
+					let old = this.session.shared.scores.data[this.synth_name][freq][j];
+					this.session.shared.scores.submitOp([{p: [this.synth_name, freq, j], ld: old, li: !old}]);
 				});
 				this.cells[freq].push(cell);
 				this.layer_cells.add(cell);
@@ -122,6 +133,21 @@ class PianoRoll {
 			this.cells[freq][idx].fill(this.active_color);
 		} else {
 			this.cells[freq][idx].fill(this.default_color);
+		}
+	}
+
+	select(key) {
+		this.synth_name = key;
+		this.synth_label.text(this.synth_name);
+
+		let n_rows = Object.keys(this.cells).length;
+		let n_slots = this.session.shared.nSlots();
+
+		for (let i = 0; i < n_rows; i++) {
+			let freq = Notes.freq(i);
+			for (let j = 0; j < n_slots; j++) {
+				this.update(freq, j, this.session.shared.scores.data[key][freq][j]);
+			}
 		}
 	}
 }

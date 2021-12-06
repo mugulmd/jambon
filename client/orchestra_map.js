@@ -92,6 +92,12 @@ class OrchestraMap {
 			this.session.shared.geom.submitOp([{p: [key], od: old, oi: geom}]);
 		});
 
+		group.on('click', () => {
+			if (key in this.session.shared.synths.data) {
+				this.session.ui.piano_roll.select(key);
+			}
+		});
+
 		group.on('dblclick', () => {
 			let old = this.session.shared.geom.data[key];
 			let geom = { 
@@ -104,20 +110,21 @@ class OrchestraMap {
 		});
 
 		let tr = new Konva.Transformer({
-			nodes: [group], 
+			nodes: [circle], 
 			keepRatio: true, 
 			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'], 
 			rotateEnabled: false, 
-			centeredScaling: true
+			centeredScaling: true, 
+			flipEnabled: false
 		});
 		this.layer_elts.add(tr);
 
-		group.on('transformend', () => {
+		circle.on('transformend', () => {
 			let old = this.session.shared.geom.data[key];
 			let geom = { 
 				x: old.x, 
 				y: old.y, 
-				size: group.scaleX(), 
+				size: circle.scaleX(), 
 				active: old.active
 			};
 			this.session.shared.geom.submitOp([{p: [key], od: old, oi: geom}]);

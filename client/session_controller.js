@@ -115,6 +115,8 @@ class SessionController {
 							this.flushScore(key);
 						}
 						console.log("shared scores flushed");
+
+						this.ui.piano_roll.select('synth');
 					});
 
 					this.shared.geom.subscribe(() => {
