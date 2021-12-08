@@ -1,9 +1,10 @@
-// controller.js
+// session_controller.js
 
 const Tone = require('tone');
 const SharedData = require('./shared_data.js');
 const LocalData = require('./local_data.js');
 const SessionUI = require('./session_ui.js');
+const SessionLogin = require('./session_login.js');
 const Notes = require('../utils/notes.js');
 
 class SessionController {
@@ -11,6 +12,127 @@ class SessionController {
 		this.shared = new SharedData(connection);
 		this.local = new LocalData(this);
 		this.ui = new SessionUI(this);
+		this.login = new SessionLogin(this);
+	}
+
+	async join() {
+		await Tone.start();
+		console.log("audio is ready");
+		this.subscribeParticipants();
+		this.setup();
+	}
+
+	subscribeParticipants() {
+		this.shared.participants.subscribe(() => {
+			console.log("subscription to participants data : ok");
+			for (let key in this.shared.participants.data) {
+				this.ui.participants_pannel.add(key);
+			}
+			this.login.show();
+
+			this.subscribeRythm();
+		});
+	}
+
+	subscribeRythm() {
+		this.shared.rythm.subscribe(() => {
+			console.log("subscription to rythm data : ok");
+			Tone.Transport.bpm.value = this.shared.rythm.data.bpm;
+
+			this.subscribeSamples();
+		});
+	}
+
+	subscribeSamples() {
+		this.shared.samples.subscribe(() => {
+			console.log("subscription to samples data : ok");
+
+			this.subscribeSynths();
+		});
+	}
+
+	subscribeSynths() {
+		this.shared.synths.subscribe(() => {
+			console.log("subscription to synths data : ok");
+			
+			this.initLocalData();
+			this.subscribePatterns();
+			this.subscribeScores();
+			this.subscribeGeom();
+		});
+	}
+
+	initLocalData() {
+		for (let key in this.shared.samples.data) {
+			this.local.addPlayer(key);
+			this.local.addPattern(key);
+			this.ui.orchestra_map.add(key);
+			this.ui.step_sequencer.add(key);
+		}
+		for (let key in this.shared.synths.data) {
+			this.local.addSynth(key);
+			this.local.addScore(key);
+			this.ui.orchestra_map.add(key);
+		}
+		this.ui.piano_roll.init();
+		console.log("local data initialized");
+	}
+
+	subscribePatterns() {
+		this.shared.patterns.subscribe(() => {
+			for (let key in this.shared.samples.data) {
+				this.flushPattern(key);
+			}
+			console.log("shared patterns flushed");
+		});
+	}
+
+	subscribeScores() {
+		this.shared.scores.subscribe(() => {
+			for (let key in this.shared.synths.data) {
+				this.flushScore(key);
+			}
+			console.log("shared scores flushed");
+
+			this.ui.piano_roll.select('synth');
+		});
+	}
+
+	subscribeGeom() {
+		this.shared.geom.subscribe(() => {
+			for (let key in this.shared.samples.data) {
+				this.flushGeom(key);
+			}
+			for (let key in this.shared.synths.data) {
+				this.flushGeom(key);
+			}
+			console.log("shared geom flushed");
+		});
+	}
+
+	setup() {
+		this.shared.participants.on('op', (op, source) => {
+			let key = op[0].p[0];
+			this.ui.participants_pannel.add(key);
+		});
+
+		this.shared.geom.on('op', (op, source) => {
+			let key = op[0].p[0];
+			this.flushGeom(key);
+		});
+
+		this.shared.patterns.on('op', (op, source) => {
+			let key = op[0].p[0];
+			let idx = op[0].p[1];
+			this.flushPatternStep(key, idx);
+		});
+
+		this.shared.scores.on('op', (op, source) => {
+			let key = op[0].p[0];
+			let freq = op[0].p[1];
+			let idx = op[0].p[2];
+			this.flushScoreNote(key, freq, idx);
+		});
 	}
 
 	flushGeom(key) {
@@ -72,87 +194,6 @@ class SessionController {
 				this.flushScoreNote(key, freq, j);
 			}
 		}
-	}
-
-	async join() {
-		await Tone.start();
-		console.log("audio is ready");
-
-		this.shared.rythm.subscribe(() => {
-			console.log("subscription to rythm data : ok");
-
-			Tone.Transport.bpm.value = this.shared.rythm.data.bpm;
-
-			this.shared.samples.subscribe(() => {
-				console.log("subscription to samples data : ok");
-
-				this.shared.synths.subscribe(() => {
-					console.log("subscription to synths data : ok");
-
-					for (let key in this.shared.samples.data) {
-						this.local.addPlayer(key);
-						this.local.addPattern(key);
-						this.ui.orchestra_map.add(key);
-						this.ui.step_sequencer.add(key);
-					}
-					for (let key in this.shared.synths.data) {
-						this.local.addSynth(key);
-						this.local.addScore(key);
-						this.ui.orchestra_map.add(key);
-					}
-					this.ui.piano_roll.init();
-					console.log("local data initialized");
-
-					this.shared.patterns.subscribe(() => {
-						for (let key in this.shared.samples.data) {
-							this.flushPattern(key);
-						}
-						console.log("shared patterns flushed");
-					});
-
-					this.shared.scores.subscribe(() => {
-						for (let key in this.shared.synths.data) {
-							this.flushScore(key);
-						}
-						console.log("shared scores flushed");
-
-						this.ui.piano_roll.select('synth');
-					});
-
-					this.shared.geom.subscribe(() => {
-						for (let key in this.shared.samples.data) {
-							this.flushGeom(key);
-						}
-						for (let key in this.shared.synths.data) {
-							this.flushGeom(key);
-						}
-						console.log("shared geom flushed");
-					});
-				});
-			});
-		});
-
-		this.setup();
-	}
-
-	setup() {
-		this.shared.geom.on('op', (op, source) => {
-			let key = op[0].p[0];
-			this.flushGeom(key);
-		});
-
-		this.shared.patterns.on('op', (op, source) => {
-			let key = op[0].p[0];
-			let idx = op[0].p[1];
-			this.flushPatternStep(key, idx);
-		});
-
-		this.shared.scores.on('op', (op, source) => {
-			let key = op[0].p[0];
-			let freq = op[0].p[1];
-			let idx = op[0].p[2];
-			this.flushScoreNote(key, freq, idx);
-		});
 	}
 }
 

@@ -7,9 +7,9 @@ class CtrlPannel {
 		this.session = session_controller;
 
 		this.button_play = document.getElementById('buttonPlay');
-		this.button_play.onclick = function() {
+		this.button_play.addEventListener('click', () => {
 			Tone.Transport.toggle();
-		}
+		});
 	}
 }
 

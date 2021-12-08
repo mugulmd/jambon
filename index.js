@@ -10,7 +10,6 @@ const WebSocket = require("ws");
 const Backend = require("sharedb");
 const WebSocketJSONStream = require("@teamwork/websocket-json-stream");
 const Notes = require('./utils/notes.js');
-const Tone = require('tone');
 
 
 // App
@@ -25,6 +24,9 @@ const server = http.createServer(app);
 const webSocketServer = new WebSocket.Server({server: server});
 const backend = new Backend({doNotForwardSendPresenceErrorsToClient: true});
 const connection = backend.connect();
+
+let participants = connection.get('general', 'participants');
+participants.create({});
 
 webSocketServer.on('connection', (socket) => {
 	console.log('a user connected');

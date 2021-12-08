@@ -2,6 +2,7 @@
 
 class SharedData {
 	constructor(connection) {
+		this.participants = connection.get('general', 'participants');
 		this.rythm = connection.get('tracks', 'rythm');
 		this.samples = connection.get('instruments', 'samples');
 		this.synths = connection.get('instruments', 'synths');

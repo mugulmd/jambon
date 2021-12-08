@@ -2,6 +2,39 @@ body {
 	font-family: Ubuntu;
 }
 
+#screen-blocker {
+	display: block;
+	background: rgba(0, 0, 0, 0.5);
+	position:fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 99;
+}
+
+#login-popup {
+	display: none;
+	position: fixed;
+	top: 25vh;
+	left: 25vw;
+	width: 50vw;
+	height: 50vh;
+	z-index: 100;
+	background-color: white;
+}
+
+#participants {
+	border: 2px solid black;
+}
+
+.dot {
+	height: 10px;
+	width: 10px;
+	border-radius: 50%;
+	display: inline-block;
+}
+
 #player-controls {
 	border: 2px solid black;
 }
