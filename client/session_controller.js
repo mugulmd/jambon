@@ -132,7 +132,7 @@ class SessionController {
 				let scores_data = {};
 				for (let key in this.shared.synths.data) {
 					scores_data[key] = {};
-					for (let i = 0; i < 12; i++) {
+					for (let i = 0; i < 12 * 6; i++) {
 						let freq = Notes.freq(i);
 						scores_data[key][freq] = [];
 						for (let j = 0; j < n_slots; j++) {
@@ -228,7 +228,7 @@ class SessionController {
 
 	flushScore(key) {
 		let n_slots = this.shared.nSlots();
-		for (let i = 0; i < 12; i++) {
+		for (let i = 0; i < 12 * 6; i++) {
 			let freq = Notes.freq(i);
 			for (let j = 0; j < n_slots; j++) {
 				this.flushScoreNote(key, freq, j);

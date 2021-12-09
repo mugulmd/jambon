@@ -14,7 +14,6 @@ class PianoRoll {
 		});
 		let container = this.stage.container();
 		this.stage.width(container.clientWidth);
-		this.stage.height(container.clientHeight);
 
 		this.layer_bckg = new Konva.Layer();
 		this.stage.add(this.layer_bckg);
@@ -34,11 +33,14 @@ class PianoRoll {
 
 		this.cells = {};
 		this.keyboard_size = 50;
+		this.top_offset = 20;
 		this.cell_width = 30;
 		this.cell_height = 20;
 		this.default_color = 'gray';
 		this.active_color = 'orange';
 		this.synth_label = undefined;
+
+		this.stage.height(this.top_offset + this.cell_height * 12 * 6);
 
 		this.drawBckg();
 		this.drawKeyboard();
@@ -99,10 +101,10 @@ class PianoRoll {
 	}
 
 	drawKeyboard() {
-		for (let i = 0; i < 12; i++) {
+		for (let i = 0; i < 12 * 6; i++) {
 			let text = new Konva.Text({
 				x: 10, 
-				y: (i+1) * this.cell_height, 
+				y: this.top_offset + i * this.cell_height, 
 				text: Notes.freq(i), 
 				fontSize: 12, 
 				fontFamily: 'Ubuntu'
@@ -112,13 +114,13 @@ class PianoRoll {
 	}
 
 	createCells() {
-		for (let i = 0; i < 12; i++) {
+		for (let i = 0; i < 12 * 6; i++) {
 			let freq = Notes.freq(i);
 			this.cells[freq] = [];
 			for (let j = 0; j < this.session.shared.nSlots(); j++) {
 				let cell = new Konva.Rect({
 					x: this.keyboard_size + j * this.cell_width, 
-					y: (i+1) * this.cell_height, 
+					y: this.top_offset + i * this.cell_height, 
 					width: this.cell_width, 
 					height: this.cell_height, 
 					fill: this.default_color, 
@@ -140,7 +142,7 @@ class PianoRoll {
 		let n_slots = this.session.shared.nSlots();
 
 		for (let i = 0; i <= n_rows; i++) {
-			let y = (i + 1) * this.cell_height;
+			let y = this.top_offset + i * this.cell_height;
 			let line = new Konva.Line({
 				points: [0, y, this.keyboard_size+n_slots*this.cell_width, y], 
 				stroke: 'darkslategray', 
@@ -152,7 +154,7 @@ class PianoRoll {
 		for (let i = 0; i <= n_slots; i++) {
 			let x = this.keyboard_size + i * this.cell_width;
 			let line = new Konva.Line({
-				points: [x, this.cell_height, x, (n_rows+1)*this.cell_height], 
+				points: [x, this.cell_height, x, this.top_offset + n_rows * this.cell_height], 
 				stroke: 'darkslategray', 
 				strokeWidth: ((i % 4 == 0) ? 2 : 1)
 			});

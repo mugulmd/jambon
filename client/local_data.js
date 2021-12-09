@@ -61,7 +61,7 @@ class LocalData {
 	addScore(key) {
 		this.score_event_ids[key] = {};
 		let n_slots = this.session.shared.nSlots();
-		for (let i = 0; i < 12; i++) {
+		for (let i = 0; i < 12 * 6; i++) {
 			let freq = Notes.freq(i);
 			this.score_event_ids[key][freq] = [];
 			for (let j = 0; j < n_slots; j++) {

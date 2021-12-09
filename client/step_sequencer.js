@@ -31,6 +31,7 @@ class StepSequencer {
 
 		this.cells = {};
 		this.name_col_size = 50;
+		this.top_offset = 20;
 		this.cell_width = 30;
 		this.cell_height = 20;
 		this.default_color = 'gray';
@@ -56,7 +57,7 @@ class StepSequencer {
 	add(key) {
 		let n_rows = Object.keys(this.cells).length;
 		this.cells[key] = [];
-		let yRow = (n_rows + 1) * this.cell_height;
+		let yRow = this.top_offset + n_rows * this.cell_height;
 
 		let text = new Konva.Text({
 			x: 10, 
@@ -114,9 +115,9 @@ class StepSequencer {
 		let n_slots = this.session.shared.nSlots();
 
 		for (let i = 0; i <= n_rows; i++) {
-			let y = (i + 1) * this.cell_height;
+			let y = this.top_offset + i * this.cell_height;
 			let line = new Konva.Line({
-				points: [0, y, this.name_col_size+n_slots*this.cell_width, y], 
+				points: [0, y, this.name_col_size + n_slots * this.cell_width, y], 
 				stroke: 'darkslategray', 
 				strokeWidth: 1
 			});
@@ -126,7 +127,7 @@ class StepSequencer {
 		for (let i = 0; i <= n_slots; i++) {
 			let x = this.name_col_size + i * this.cell_width;
 			let line = new Konva.Line({
-				points: [x, this.cell_height, x, (n_rows+1)*this.cell_height], 
+				points: [x, this.cell_height, x, this.top_offset + n_rows * this.cell_height], 
 				stroke: 'darkslategray', 
 				strokeWidth: ((i % 4 == 0) ? 2 : 1)
 			});
