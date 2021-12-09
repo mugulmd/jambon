@@ -25,18 +25,26 @@ const webSocketServer = new WebSocket.Server({server: server});
 const backend = new Backend({doNotForwardSendPresenceErrorsToClient: true});
 const connection = backend.connect();
 
-let participants = connection.get('general', 'participants');
-participants.create({});
+let conductor_chosen = false;
 
 webSocketServer.on('connection', (socket) => {
 	console.log('a user connected');
 	const stream = new WebSocketJSONStream(socket);
 	backend.listen(stream);
+	if (conductor_chosen) {
+		socket.send("not conductor");
+	} else {
+		conductor_chosen = true;
+		socket.send("conductor");
+	}
 });
 
 
 // Shared data : document creation and initialization
 
+
+let participants = connection.get('general', 'participants');
+participants.create({});
 
 // instruments
 
@@ -80,8 +88,10 @@ geom.create(geom_data);
 let rythm = connection.get('tracks', 'rythm');
 let rythm_data = {
 	bpm: 90, 
+	time_signature_top: 4, 
+	time_signature_bottom: 4, 
 	loop_size: 4, 
-	time_signature: 4
+	resolution: 2
 };
 rythm.create(rythm_data);
 

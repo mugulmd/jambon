@@ -41,12 +41,18 @@ body {
 
 #orchestra-map {
 	border: 2px solid black;
+	width: 100vw;
+	height: 400px;
 }
 
 #step-sequencer {
 	border: 2px solid black;
+	width: 100vw;
+	height: 400px;
 }
 
 #piano-roll {
 	border: 2px solid black;
+	width: 100vw;
+	height: 400px;
 }

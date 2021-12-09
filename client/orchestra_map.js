@@ -7,10 +7,11 @@ class OrchestraMap {
 		this.session = session_controller;
 
 		this.stage = new Konva.Stage({
-			container: "orchestra-map", 
-			width: 900, 
-			height: 400
+			container: "orchestra-map"
 		});
+		let container = this.stage.container();
+		this.stage.width(container.clientWidth);
+		this.stage.height(container.clientHeight);
 
 		this.layer_bckg = new Konva.Layer();
 		this.stage.add(this.layer_bckg);
@@ -28,33 +29,15 @@ class OrchestraMap {
 		this.drawBckg();
 	}
 
-	drawBckg() {
-		let rect = new Konva.Rect({
-			x: 0, 
-			y: 0, 
-			width: this.stage.width(),
-			height: this.stage.height(), 
-			fill: 'beige'
-		});
-		this.layer_bckg.add(rect);
-
-		for (let r = 50; r < this.stage.height(); r += 100) {
-			let circle = new Konva.Circle({
-				x: this.stage.width()/2, 
-				y: this.stage.height(), 
-				radius: r, 
-				stroke: 'darkkhaki', 
-				strokeWidth: 3
-			});
-			this.layer_bckg.add(circle);
+	init() {
+		this.layer_elts.destroyChildren();
+		this.elts = {};
+		for (let key in this.session.shared.samples.data) {
+			this.add(key);
 		}
-
-		let line = new Konva.Line({
-			points: [this.stage.width()/2, 0, this.stage.width()/2, this.stage.height()], 
-			stroke: 'darkkhaki', 
-			strokeWidth: 3
-		});
-		this.layer_bckg.add(line);
+		for (let key in this.session.shared.synths.data) {
+			this.add(key);
+		}
 	}
 
 	add(key) {
@@ -140,7 +123,36 @@ class OrchestraMap {
 		} else {
 			circle.fill(this.mute_color);
 		}
-	} 
+	}
+
+	drawBckg() {
+		let rect = new Konva.Rect({
+			x: 0, 
+			y: 0, 
+			width: this.stage.width(),
+			height: this.stage.height(), 
+			fill: 'beige'
+		});
+		this.layer_bckg.add(rect);
+
+		for (let r = 50; r < this.stage.height(); r += 100) {
+			let circle = new Konva.Circle({
+				x: this.stage.width()/2, 
+				y: this.stage.height(), 
+				radius: r, 
+				stroke: 'darkkhaki', 
+				strokeWidth: 3
+			});
+			this.layer_bckg.add(circle);
+		}
+
+		let line = new Konva.Line({
+			points: [this.stage.width()/2, 0, this.stage.width()/2, this.stage.height()], 
+			stroke: 'darkkhaki', 
+			strokeWidth: 3
+		});
+		this.layer_bckg.add(line);
+	}
 }
 
 module.exports = OrchestraMap;

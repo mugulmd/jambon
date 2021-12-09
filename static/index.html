@@ -9,18 +9,62 @@
 
 	<div id="screen-blocker">
 		<div id="login-popup">
-			<input type="text" name="name" id="field-name">
-			<button id="finish-login">Ok</button>
+			<div>
+				<label for="login-pseudo">Your pseudo : </label>
+				<input type="text" id="login-pseudo">
+			</div>
+
+			<div>
+				<label for="login-bpm">BPM : </label>
+				<input type="range" class="conductor" id="login-bpm" min="10" max="200" value="90">
+			</div>
+
+			<div>
+				<label for="login-time-signature">Time signature : </label>
+				<div>
+					<input type="number" class="conductor" id="login-time-signature-top" min="1" max="12" value="4">
+					<span> / </span>
+					<select class="conductor" id="login-time-signature-bottom">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="4" selected>4</option>
+						<option value="8">8</option>
+					</select>
+				</div>
+			</div>
+
+			<div>
+				<label for="login-loop-size">Loop size : </label>
+				<input type="number" class="conductor" id="login-loop-size" min="2" max="8" value="4">
+			</div>
+
+			<div>
+				<label for="login-resolution">Resolution : </label>
+				<select class="conductor" id="login-resolution">
+					<option value="1">1</option>
+					<option value="2" selected>1/2</option>
+					<option value="4">1/4</option>
+				</select>
+			</div>
+
+			<div>
+				<button id="finish-login">Ok</button>
+			</div>
 		</div>
 	</div>
 
+
 	<div id="main-content">
 		<div id="participants"></div>
+
 		<div id="player-controls">
-			<button id="buttonPlay">Play</button>
+			<button id="play-pause">Play</button>
 		</div>
+
 		<div id="orchestra-map"></div>
+
 		<div id="step-sequencer"></div>
+
 		<div id="piano-roll"></div>
 	</div>
 

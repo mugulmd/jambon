@@ -22,11 +22,24 @@ class LocalData {
 		};
 	}
 
+	initPlayers() {
+		for (let key in this.session.shared.samples.data) {
+			this.addPlayer(key);
+		}
+	}
+
 	addPattern(key) {
 		this.pattern_event_ids[key] = [];
 		let n_slots = this.session.shared.nSlots();
 		for (let i = 0; i < n_slots; i++) {
 			this.pattern_event_ids[key].push(0);
+		}
+	}
+
+	initPatterns() {
+		this.pattern_event_ids = {};
+		for (let key in this.session.shared.samples.data) {
+			this.addPattern(key);
 		}
 	}
 
@@ -39,6 +52,12 @@ class LocalData {
 		};
 	}
 
+	initSynths() {
+		for (let key in this.session.shared.synths.data) {
+			this.addSynth(key);
+		}
+	}
+
 	addScore(key) {
 		this.score_event_ids[key] = {};
 		let n_slots = this.session.shared.nSlots();
@@ -48,6 +67,13 @@ class LocalData {
 			for (let j = 0; j < n_slots; j++) {
 				this.score_event_ids[key][freq].push(0);
 			}
+		}
+	}
+
+	initScores() {
+		this.score_event_ids = {};
+		for (let key in this.session.shared.synths.data) {
+			this.addScore(key);
 		}
 	}
 }

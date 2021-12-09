@@ -10,10 +10,11 @@ class PianoRoll {
 		this.synth_name = undefined;
 
 		this.stage = new Konva.Stage({
-			container: "piano-roll", 
-			width: 900, 
-			height: 400
+			container: "piano-roll"
 		});
+		let container = this.stage.container();
+		this.stage.width(container.clientWidth);
+		this.stage.height(container.clientHeight);
 
 		this.layer_bckg = new Konva.Layer();
 		this.stage.add(this.layer_bckg);
@@ -32,7 +33,7 @@ class PianoRoll {
 		this.layer_grid.draw();
 
 		this.cells = {};
-		this.keyboard_size = 100;
+		this.keyboard_size = 50;
 		this.cell_width = 30;
 		this.cell_height = 20;
 		this.default_color = 'gray';
@@ -41,6 +42,41 @@ class PianoRoll {
 
 		this.drawBckg();
 		this.drawKeyboard();
+	}
+
+	init() {
+		this.layer_cells.destroyChildren();
+		this.layer_grid.destroyChildren();
+		this.cells = {};
+
+		let n_slots = this.session.shared.nSlots();
+		this.cell_width = Math.min((this.stage.width() - this.keyboard_size) / n_slots, 30);
+
+		this.createCells();
+		this.drawGrid();
+	}
+
+	update(freq, idx, active) {
+		if (active) {
+			this.cells[freq][idx].fill(this.active_color);
+		} else {
+			this.cells[freq][idx].fill(this.default_color);
+		}
+	}
+
+	select(key) {
+		this.synth_name = key;
+		this.synth_label.text(this.synth_name);
+
+		let n_rows = Object.keys(this.cells).length;
+		let n_slots = this.session.shared.nSlots();
+
+		for (let i = 0; i < n_rows; i++) {
+			let freq = Notes.freq(i);
+			for (let j = 0; j < n_slots; j++) {
+				this.update(freq, j, this.session.shared.scores.data[key][freq][j]);
+			}
+		}
 	}
 
 	drawBckg() {
@@ -89,6 +125,7 @@ class PianoRoll {
 					cornerRadius: 5
 				});
 				cell.on('click', () => {
+					if (this.synth_name == undefined) return;
 					let old = this.session.shared.scores.data[this.synth_name][freq][j];
 					this.session.shared.scores.submitOp([{p: [this.synth_name, freq, j], ld: old, li: !old}]);
 				});
@@ -120,34 +157,6 @@ class PianoRoll {
 				strokeWidth: ((i % 4 == 0) ? 2 : 1)
 			});
 			this.layer_grid.add(line);
-		}
-	}
-
-	init() {
-		this.createCells();
-		this.drawGrid();
-	}
-
-	update(freq, idx, active) {
-		if (active) {
-			this.cells[freq][idx].fill(this.active_color);
-		} else {
-			this.cells[freq][idx].fill(this.default_color);
-		}
-	}
-
-	select(key) {
-		this.synth_name = key;
-		this.synth_label.text(this.synth_name);
-
-		let n_rows = Object.keys(this.cells).length;
-		let n_slots = this.session.shared.nSlots();
-
-		for (let i = 0; i < n_rows; i++) {
-			let freq = Notes.freq(i);
-			for (let j = 0; j < n_slots; j++) {
-				this.update(freq, j, this.session.shared.scores.data[key][freq][j]);
-			}
 		}
 	}
 }

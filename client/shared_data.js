@@ -12,7 +12,7 @@ class SharedData {
 	}
 
 	nSlots() {
-		return this.rythm.data.loop_size * this.rythm.data.time_signature;
+		return this.rythm.data.loop_size * this.rythm.data.time_signature_top * this.rythm.data.resolution;
 	}
 }
 
