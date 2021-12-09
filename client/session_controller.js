@@ -39,6 +39,7 @@ class SessionController {
 		this.shared.rythm.subscribe(() => {
 			console.log("subscription to rythm data : ok");
 			Tone.Transport.bpm.value = this.shared.rythm.data.bpm;
+			this.ui.ctrl_pannel.slider_bpm.value = this.shared.rythm.data.bpm.toString();
 
 			this.subscribeSamples();
 		});
