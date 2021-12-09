@@ -38,6 +38,7 @@ class OrchestraMap {
 		for (let key in this.session.shared.synths.data) {
 			this.add(key);
 		}
+		this.updateOwnership();
 	}
 
 	add(key) {
@@ -50,7 +51,9 @@ class OrchestraMap {
 			x: 0, 
 			y: 0, 
 			radius: this.elt_size, 
-			fill: this.default_color
+			fill: this.default_color, 
+			strokeWidth: 4, 
+			strokeEnabled: false
 		});
 		group.add(circle);
 		let text = new Konva.Text({
@@ -77,7 +80,17 @@ class OrchestraMap {
 
 		group.on('click', () => {
 			if (key in this.session.shared.synths.data) {
-				this.session.ui.piano_roll.select(key);
+				if (this.session.shared.synths.data[key].owner == undefined) {
+					let old = this.session.shared.synths.data;
+					let new_data = old;
+					for (let key_prime in this.session.shared.synths.data) {
+						if (this.session.shared.synths.data[key_prime].owner == this.session.login.pseudo()) {
+							new_data[key_prime].owner = undefined;
+						}
+					}
+					new_data[key].owner = this.session.login.pseudo();
+					this.session.shared.synths.submitOp([{p: [], od: old, oi: new_data}]);
+				}
 			}
 		});
 
@@ -117,7 +130,7 @@ class OrchestraMap {
 	update(key, geom) {
 		this.elts[key].x(this.stage.width() * (geom.x + 1) / 2);
 		this.elts[key].y(this.stage.height() * (geom.y + 1) / 2);
-		let circle = this.elts[key].getChildren((node) => {return node.getClassName()=='Circle';})[0];
+		let circle = this.getCircle(key);
 		if (geom.active) {
 			circle.fill(this.default_color);
 		} else {
@@ -152,6 +165,28 @@ class OrchestraMap {
 			strokeWidth: 3
 		});
 		this.layer_bckg.add(line);
+
+		this.layer_bckg.on('click', () => {
+			// TODO : if own synth, free it
+		});
+	}
+
+	getCircle(key) {
+		return this.elts[key].getChildren((node) => {return node.getClassName()=='Circle';})[0];
+	}
+
+	updateOwnership() {
+		for (let key in this.session.shared.synths.data) {
+			let owner = this.session.shared.synths.data[key].owner;
+			let circle = this.getCircle(key);
+			if (owner == undefined) {
+				circle.strokeEnabled(false);
+			} else {
+				let color = this.session.shared.participants.data[owner].color;
+				circle.stroke(color);
+				circle.strokeEnabled(true);
+			}
+		}
 	}
 }
 

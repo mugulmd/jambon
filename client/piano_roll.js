@@ -81,6 +81,21 @@ class PianoRoll {
 		}
 	}
 
+	deselect() {
+		this.synth_name = undefined;
+		this.synth_label.text("");
+
+		let n_rows = Object.keys(this.cells).length;
+		let n_slots = this.session.shared.nSlots();
+
+		for (let i = 0; i < n_rows; i++) {
+			let freq = Notes.freq(i);
+			for (let j = 0; j < n_slots; j++) {
+				this.update(freq, j, false);
+			}
+		}
+	}
+
 	drawBckg() {
 		let rect = new Konva.Rect({
 			x: 0, 

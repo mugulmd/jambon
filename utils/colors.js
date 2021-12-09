@@ -30,9 +30,7 @@ const generate = () => {
 	let r = Math.floor(rgb[0] * 255);
 	let g = Math.floor(rgb[1] * 255);
 	let b = Math.floor(rgb[2] * 255);
-	console.log("r: " + r + ", g: " + g + ", b: " + b);
 	let hex = "#" + r.toString(16) + g.toString(16) + b.toString(16);
-	console.log(hex);
 	return hex;
 };
 

@@ -108,6 +108,23 @@ class SessionController {
 			this.ui.participants_pannel.add(key);
 		});
 
+		this.shared.synths.on('op', (op, source) => {
+			// update circle strokes in orchestra map
+			this.ui.orchestra_map.updateOwnership();
+			// update piano roll if necessary
+			let new_data = op[0].oi;
+			if (this.ui.piano_roll.synth_name != undefined) {
+				if (new_data[this.ui.piano_roll.synth_name].owner == this.login.pseudo()) return;
+			}
+			for (let key in new_data) {
+				if (new_data[key].owner == this.login.pseudo()) {
+					this.ui.piano_roll.select(key);
+					return;
+				}
+			}
+			this.ui.piano_roll.deselect();
+		});
+
 		this.shared.geom.on('op', (op, source) => {
 			let key = op[0].p[0];
 			this.flushGeom(key);

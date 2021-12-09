@@ -25,20 +25,6 @@ const webSocketServer = new WebSocket.Server({server: server});
 const backend = new Backend({doNotForwardSendPresenceErrorsToClient: true});
 const connection = backend.connect();
 
-let conductor_chosen = false;
-
-webSocketServer.on('connection', (socket) => {
-	console.log('a user connected');
-	const stream = new WebSocketJSONStream(socket);
-	backend.listen(stream);
-	if (conductor_chosen) {
-		socket.send("not conductor");
-	} else {
-		conductor_chosen = true;
-		socket.send("conductor");
-	}
-});
-
 
 // Shared data : document creation and initialization
 
@@ -60,9 +46,15 @@ samples.create(samples_data);
 // synths
 let synths = connection.get('instruments', 'synths');
 let synths_data = {
-	'synth': {}, 
-	'FM synth': {}, 
-	'AM synth': {}
+	'synth': {
+		owner: undefined
+	}, 
+	'FM synth': {
+		owner: undefined
+	}, 
+	'AM synth': {
+		owner: undefined
+	}
 };
 synths.create(synths_data);
 
@@ -113,7 +105,7 @@ let scores = connection.get('tracks', 'scores');
 let scores_data = {};
 for (let key in synths_data) {
 	scores_data[key] = {};
-	for (let i = 0; i < 12; i++) {
+	for (let i = 0; i < 12 * 6; i++) {
 		let freq = Notes.freq(i);
 		scores_data[key][freq] = [];
 		for (let j = 0; j < n_slots; j++) {
@@ -122,6 +114,23 @@ for (let key in synths_data) {
 	}
 }
 scores.create(scores_data);
+
+
+// Client-server communication
+
+let conductor_chosen = false;
+
+webSocketServer.on('connection', (socket) => {
+	console.log('a user connected');
+	const stream = new WebSocketJSONStream(socket);
+	backend.listen(stream);
+	if (conductor_chosen) {
+		socket.send("not conductor");
+	} else {
+		conductor_chosen = true;
+		socket.send("conductor");
+	}
+});
 
 
 // Launch
