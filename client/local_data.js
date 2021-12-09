@@ -45,7 +45,15 @@ class LocalData {
 
 	addSynth(key) {
 		let panvol = new Tone.PanVol(0, 0).toDestination();
-		let poly = new Tone.PolySynth(Tone.Synth).connect(panvol);
+		let poly = undefined;
+		let type = this.session.shared.synths.data[key].type;
+		if (type == 'basic') {
+			poly = new Tone.PolySynth(Tone.Synth).connect(panvol);
+		} else if (type == 'AM') {
+			poly = new Tone.PolySynth(Tone.AMSynth).connect(panvol);
+		} else if (type == 'FM') {
+			poly = new Tone.PolySynth(Tone.FMSynth).connect(panvol);
+		}
 		this.synths[key] = {
 			audio: poly, 
 			ctrl: panvol

@@ -47,12 +47,15 @@ samples.create(samples_data);
 let synths = connection.get('instruments', 'synths');
 let synths_data = {
 	'synth': {
+		type: 'basic', 
 		owner: undefined
 	}, 
 	'FM synth': {
+		type: 'FM', 
 		owner: undefined
 	}, 
 	'AM synth': {
+		type: 'AM', 
 		owner: undefined
 	}
 };

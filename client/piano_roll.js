@@ -168,10 +168,12 @@ class PianoRoll {
 
 		for (let i = 0; i <= n_slots; i++) {
 			let x = this.keyboard_size + i * this.cell_width;
+			let w = ((i % this.session.shared.rythm.data.resolution == 0) ? 
+				((i % (this.session.shared.rythm.data.resolution * this.session.shared.rythm.data.time_signature_top) == 0) ? 4 : 2) : 1);
 			let line = new Konva.Line({
 				points: [x, this.cell_height, x, this.top_offset + n_rows * this.cell_height], 
 				stroke: 'darkslategray', 
-				strokeWidth: ((i % 4 == 0) ? 2 : 1)
+				strokeWidth: w
 			});
 			this.layer_grid.add(line);
 		}
