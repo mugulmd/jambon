@@ -90,6 +90,8 @@ class OrchestraMap {
 					}
 					new_data[key].owner = this.session.login.pseudo();
 					this.session.shared.synths.submitOp([{p: [], od: old, oi: new_data}]);
+				} else {
+					this.session.triggerNotification();
 				}
 			}
 		});
@@ -167,7 +169,14 @@ class OrchestraMap {
 		this.layer_bckg.add(line);
 
 		this.layer_bckg.on('click', () => {
-			// TODO : if own synth, free it
+			for (let key in this.session.shared.synths.data) {
+				if (this.session.shared.synths.data[key].owner == this.session.login.pseudo()) {
+					let old = this.session.shared.synths.data;
+					let new_data = old;
+					new_data[key].owner = undefined;
+					this.session.shared.synths.submitOp([{p: [], od: old, oi: new_data}]);
+				}
+			}
 		});
 	}
 

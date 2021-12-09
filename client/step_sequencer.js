@@ -129,7 +129,7 @@ class StepSequencer {
 			let line = new Konva.Line({
 				points: [x, this.cell_height, x, this.top_offset + n_rows * this.cell_height], 
 				stroke: 'darkslategray', 
-				strokeWidth: ((i % 4 == 0) ? 2 : 1)
+				strokeWidth: ((i % this.session.shared.rythm.data.resolution == 0) ? 2 : 1)
 			});
 			this.layer_grid.add(line);
 		}

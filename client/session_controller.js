@@ -13,6 +13,7 @@ class SessionController {
 		this.login = new SessionLogin(this, is_conductor);
 		this.local = new LocalData(this);
 		this.ui = new SessionUI(this);
+		this.notification = new Tone.Player('samples/notification.wav').toDestination();
 	}
 
 	async join() {
@@ -209,12 +210,17 @@ class SessionController {
 	flushPatternStep(key, idx) {
 		let checked = this.shared.patterns.data[key][idx];
 		if(checked) {
+			let n_slots = this.shared.nSlots();
+			let slot_length = this.shared.rythm.data.time_signature_bottom*this.shared.rythm.data.resolution + "n";
+			let interval = {};
+			interval[slot_length] = n_slots;
+			let start_time = {};
+			start_time[slot_length] = idx;
 			this.local.pattern_event_ids[key][idx] = Tone.Transport.scheduleRepeat(
 				(time) => {
 					this.local.players[key].audio.start(time);
 				}, 
-				{"4n": this.shared.rythm.data.loop_size}, 
-				{"16n": idx});
+				interval, start_time);
 		} else {
 			Tone.Transport.clear(this.local.pattern_event_ids[key][idx]);
 		}
@@ -231,12 +237,17 @@ class SessionController {
 	flushScoreNote(key, freq, idx) {
 		let checked = this.shared.scores.data[key][freq][idx];
 		if(checked) {
+			let n_slots = this.shared.nSlots();
+			let slot_length = this.shared.rythm.data.time_signature_bottom*this.shared.rythm.data.resolution + "n";
+			let interval = {};
+			interval[slot_length] = n_slots;
+			let start_time = {};
+			start_time[slot_length] = idx;
 			this.local.score_event_ids[key][freq][idx] = Tone.Transport.scheduleRepeat(
 				(time) => {
 					this.local.synths[key].audio.triggerAttackRelease(freq, "16n");
 				}, 
-				{"4n": this.shared.rythm.data.loop_size}, 
-				{"16n": idx});
+				interval, start_time);
 		} else {
 			Tone.Transport.clear(this.local.score_event_ids[key][freq][idx]);
 		}
@@ -251,6 +262,10 @@ class SessionController {
 				this.flushScoreNote(key, freq, j);
 			}
 		}
+	}
+
+	triggerNotification() {
+		this.notification.start(Tone.now());
 	}
 }
 
