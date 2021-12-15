@@ -37,9 +37,15 @@ participants.create({});
 // samples
 let samples = connection.get('instruments', 'samples');
 let samples_data = {
-	'kick': "samples/kick_00.wav", 
-	'snare': "samples/snare_00.wav", 
-	'hihat': "samples/closed_hat_00.wav"
+	'kick': "samples/kick.wav", 
+	'snare': "samples/snare.wav", 
+	'closed hat': "samples/closed_hat.wav", 
+	'open hat': "samples/open_hat.wav", 
+	'tom': "samples/tom.wav",  
+	'clap': "samples/clap.wav", 
+	'shaker': "samples/shaker.wav", 
+	'scratch': "samples/scratch.wav", 
+	'fx': "samples/fx.wav"
 };
 samples.create(samples_data);
 
