@@ -163,6 +163,7 @@ class SessionController {
 			} else {
 				// a participant has changed the bpm
 				Tone.Transport.bpm.value = this.shared.rythm.data.bpm;
+				this.ui.ctrl_pannel.slider_bpm.value = this.shared.rythm.data.bpm.toString();
 			}
 		});
 
