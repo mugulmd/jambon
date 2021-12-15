@@ -47,12 +47,13 @@ class LocalData {
 		let panvol = new Tone.PanVol(0, 0).toDestination();
 		let poly = undefined;
 		let type = this.session.shared.synths.data[key].type;
+		let options = this.session.shared.synths.data[key].options;
 		if (type == 'basic') {
-			poly = new Tone.PolySynth(Tone.Synth).connect(panvol);
+			poly = new Tone.PolySynth(Tone.Synth, options).connect(panvol);
 		} else if (type == 'AM') {
-			poly = new Tone.PolySynth(Tone.AMSynth).connect(panvol);
+			poly = new Tone.PolySynth(Tone.AMSynth, options).connect(panvol);
 		} else if (type == 'FM') {
-			poly = new Tone.PolySynth(Tone.FMSynth).connect(panvol);
+			poly = new Tone.PolySynth(Tone.FMSynth, options).connect(panvol);
 		}
 		this.synths[key] = {
 			audio: poly, 

@@ -39,8 +39,8 @@ let samples = connection.get('instruments', 'samples');
 let samples_data = {
 	'kick': "samples/kick.wav", 
 	'snare': "samples/snare.wav", 
-	'closed hat': "samples/closed_hat.wav", 
-	'open hat': "samples/open_hat.wav", 
+	'c-hat': "samples/closed_hat.wav", 
+	'o-hat': "samples/open_hat.wav", 
 	'tom': "samples/tom.wav",  
 	'clap': "samples/clap.wav", 
 	'shaker': "samples/shaker.wav", 
@@ -54,14 +54,40 @@ let synths = connection.get('instruments', 'synths');
 let synths_data = {
 	'synth': {
 		type: 'basic', 
+		options: {
+			envelope: {
+				attackCurve: "exponential", 
+				attack: 0.01, 
+				decay: 0.2, 
+				release: 0.5, 
+				sustain: 0.1
+			}
+		}, 
 		owner: undefined
 	}, 
 	'FM synth': {
 		type: 'FM', 
+		options: {
+			envelope: {
+				attackCurve: "exponential", 
+				attack: 0.01, 
+				decay: 0.1, 
+				release: 0.5, 
+				sustain: 0.2
+			}
+		}, 
 		owner: undefined
 	}, 
 	'AM synth': {
 		type: 'AM', 
+		options: {
+			envelope: {
+				attack: 0.01, 
+				decay: 1, 
+				release: 1, 
+				sustain: 0.5
+			}
+		}, 
 		owner: undefined
 	}
 };
